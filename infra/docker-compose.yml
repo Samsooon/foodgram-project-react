@@ -1,20 +1,46 @@
 version: '3.3'
 services:
 
-  frontend:
-    build:
-      context: ../frontend
-      dockerfile: Dockerfile
+  db:
+    image: postgres:13.0-alpine
     volumes:
-      - ../frontend/:/app/result_build/
+      - /var/lib/postgresql/data/
+    env_file:
+      - ./.env
+
+  backend:
+    image: dsamsooon/product_helper:latest
+    expose:
+      - 8000
+    restart: always
+    volumes:
+      - static_value:/app/static/
+      - media_value:/app/media/
+    depends_on:
+      - db
+    env_file:
+      - ./.env
+
+  frontend:
+    image: dsamsooon/frontend_product_helper:latest
+    volumes:
+      - ../frontend:/app/result_build/
+
   nginx:
     image: nginx:1.19.3
-    ports:
+    ports: 
       - "80:80"
     volumes:
-      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+      - static_value:/app/static/
+      - media_value:/app/media/
       - ../frontend/build:/usr/share/nginx/html/
-      - ../docs/:/usr/share/nginx/html/api/docs/
+      - ../docs:/usr/share/nginx/html/api/docs/
+    restart: always
+    depends_on:
+      - frontend
 
-
-
+volumes:
+  postgres_data:
+  static_value:
+  media_value:

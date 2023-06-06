@@ -22,11 +22,11 @@ class Command(BaseCommand):
             with open(os.path.join(DATA_ROOT, options['filename']), 'r',
                       encoding='utf-8') as f:
                 datareader = csv.reader(f)
-                for row in datareader:
+                for name, color, slug in datareader:
                     Tag.objects.get_or_create(
-                        name=row[0],
-                        color=row[1],
-                        slug=row[2]
+                        name=name,
+                        color=color,
+                        slug=slug
                     )
         except FileNotFoundError:
             raise CommandError('Add tags file to dir data')

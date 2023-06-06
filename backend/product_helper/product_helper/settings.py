@@ -9,7 +9,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 load_dotenv(env_path)
 
-SECRET_KEY = os.getenv('SECRET_KEY', ')lp4_f0es-gssg*ygawvsd9y!)q=gt(c^&p(-!5kx%lo$x)o)m')
+SECRET_KEY = os.getenv('SECRET_KEY', default=')lp4_f0es-gssg*ygawvsd9y!)q=gt(c^&p(-!5kx%lo$x)o)m')
 
 DEBUG = True
 
@@ -75,8 +75,12 @@ WSGI_APPLICATION = 'product_helper.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': os.getenv('DB_ENGINE', default='django.db.backends.postgresql'),
+        'NAME': os.getenv('DB_NAME', default='postgres'),
+        'USER': os.getenv('POSTGRES_USER', default='postgres'),
+        'PASSWORD': os.getenv('POSTGRES_PASSWORD', default='postgres'),
+        'HOST': os.getenv('DB_HOST', default='db'),
+        'PORT': os.getenv('DB_PORT', default=5432)
     }
 }
 
@@ -111,10 +115,10 @@ SIMPLE_JWT = {
 }
 
 STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
 
 MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
 
 
 LANGUAGE_CODE = 'en-us'

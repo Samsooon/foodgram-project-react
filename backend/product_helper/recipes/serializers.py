@@ -1,11 +1,12 @@
-from .models import (Recipes, Tag, Ingredient,
-                     RecipesIngredient, Favorite, ShoppingCart)
-from rest_framework import serializers
-from django.contrib.auth import get_user_model
-from users.serializers import CustomUserSerializer, ShortRecipeSerializer
 import base64
 
+from django.contrib.auth import get_user_model
 from django.core.files.base import ContentFile
+from rest_framework import serializers
+
+from users.serializers import CustomUserSerializer, ShortRecipeSerializer
+from .models import (Favorite, Ingredient, Recipes, RecipesIngredient,
+                     ShoppingCart, Tag)
 
 User = get_user_model()
 
@@ -107,6 +108,8 @@ class RecipeListSerializer(serializers.ModelSerializer):
     ingredients = serializers.SerializerMethodField(read_only=True)
     is_favorited = serializers.SerializerMethodField(read_only=True)
     is_in_shopping_cart = serializers.SerializerMethodField(read_only=True)
+    image = Base64ImageField(required=False, allow_null=True)
+
 
     class Meta:
         model = Recipes

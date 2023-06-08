@@ -114,6 +114,13 @@ SIMPLE_JWT = {
    'AUTH_HEADER_TYPES': ('Bearer',),
 }
 
+DJOSER = {
+    'SERIALIZERS': {
+        'login': 'users.serializers.UserLoginSerializer',
+        'token_create': 'users.serializers.CustomTokenCreateSerializer',
+    }
+}
+
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
 

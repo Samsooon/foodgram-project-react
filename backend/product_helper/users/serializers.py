@@ -1,7 +1,12 @@
-from djoser.serializers import UserCreateSerializer, UserSerializer
-from recipes.models import Recipes
+from djoser.serializers import (
+    UserCreateSerializer,
+    UserSerializer,
+    TokenCreateSerializer
+)
+from django.contrib.auth.hashers import make_password 
 from rest_framework import serializers
 
+from recipes.models import Recipes
 from .models import Follow, User
 
 
@@ -20,8 +25,8 @@ class CustomUserCreateSerializer(UserCreateSerializer):
             username=validated_data['username'],
             first_name=validated_data['first_name'],
             last_name=validated_data['first_name']
+            password= make_password(validated_data.get('password'))
         )
-        user.set_password(validated_data['password'])
         user.save
         return user
 
@@ -85,3 +90,31 @@ class PasswordSerializer(serializers.Serializer):
     class Meta:
         model = User
         fields = "__all__"
+
+
+
+class UserLoginSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    password = serializers.CharField(style={'input_type': 'password'})
+
+    def validate(self, attrs):
+        user = authenticate(email=attrs.get("email"), password=attrs.get("password"))
+        if not user:
+            raise serializers.ValidationError("Unable to log in with provided credentials.")
+        if not user.is_active:
+            raise serializers.ValidationError("User account is disabled.")
+        attrs["user"] = user
+        return attrs
+
+class CustomTokenCreateSerializer(TokenCreateSerializer):
+    def __init__(self, *args, **kwargs):
+        super(CustomTokenCreateSerializer, self).__init__(*args, **kwargs)
+
+    def create(self, validated_data):
+        user = validated_data['user']
+        tokens = user.auth_tokens.filter(is_active=True)
+        if tokens.exists():
+            tokens.delete()
+
+        token = Token.objects.create(user=user)
+        return {"auth_token": token.key}

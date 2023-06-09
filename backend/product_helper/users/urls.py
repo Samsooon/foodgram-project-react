@@ -19,6 +19,6 @@ urlpatterns = [
          name='subscribe'),
     path('', include(router_v1.urls)),
     path('', include('djoser.urls')),
-     path('auth/token/login/', TokenCreateView.as_view(), name='token_create'),
+    path('auth/token/login/', TokenCreateView.as_view(), name='token_create'),
     path('auth/token/logout/', TokenDestroyView.as_view(), name='token_destroy')
 ]

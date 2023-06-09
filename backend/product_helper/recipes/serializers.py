@@ -191,16 +191,25 @@ class RecipeCreateSerializer(serializers.ModelSerializer):
             })
         return data
 
-    def create_tags(self, tags, recipe):
+    @staticmethod
+    def create_tags(tags, recipe):
         for tag in tags:
             recipe.tags.add(tag)
 
-    def create_ingredients(self, ingredients, recipe):
+    @staticmethod
+    def create_ingredients(ingredients, recipe):
         for ingredient in ingredients:
             RecipesIngredient.objects.create(
                 recipe=recipe, ingredient=ingredient['id'],
                 amount=ingredient['amount']
             )
+
+    def update(self, instance, validated_data):
+        instance.tags.clear()
+        RecipesIngredient.objects.filter(recipe=instance).delete()
+        self.create_tags(validated_data.pop('tags'), instance)
+        self.create_ingredients(validated_data.pop('ingredients'), instance)
+        return super().update(instance, validated_data)
 
     def create(self, validated_data):
         author = self.context.get('request').user

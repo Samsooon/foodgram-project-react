@@ -77,6 +77,15 @@ python3 manage.py runserver
 ## Site
 The site is available at: 158.160.105.206
 
+ADMIN USER:
+```
+{
+
+    "email": "adm1@adm.adm",
+    "password": "adm"
+
+}
+```
 
 ## Author
 [Samsonov Dmitrii](https://github.com/Samsooon?tab=repositories) - Python developer.  Developed the backend and deployment for the service Foodgram.  

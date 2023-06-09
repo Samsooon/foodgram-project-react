@@ -31,10 +31,11 @@ class User(AbstractUser):
     )
 
     class Meta:
-        verbose_name='User'
+        verbose_name = 'User'
 
     def __str__(self):
-        return f'{self.email}, {self.username}, {self.first_name}, {self.last_name}'
+        return (f'{self.email}, {self.username},'
+                f' {self.first_name}, {self.last_name}')
 
 
 class Follow(models.Model):
@@ -56,7 +57,7 @@ class Follow(models.Model):
             models.UniqueConstraint(fields=['user', 'following'],
                                     name='unique_user_subscribers')
         ]
-        verbose_name='Follow'
+        verbose_name = 'Follow'
 
     def __str__(self):
         return f'{self.user}, {self.following}'

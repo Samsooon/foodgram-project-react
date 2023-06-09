@@ -5,12 +5,12 @@ from rest_framework.generics import ListAPIView, get_object_or_404
 from rest_framework.permissions import (IsAuthenticated,
                                         IsAuthenticatedOrReadOnly)
 from rest_framework.response import Response
-from rest_framework.views import APIView
 
 from .models import Follow, User
 from .pagination import CustomPageNumberPagination
 from .serializers import (CustomUserCreateSerializer, CustomUserSerializer,
-                          FollowSerializer, PasswordSerializer)
+                          FollowSerializer, PasswordSerializer,
+                          FollowerSerializer)
 
 
 class CustomUserViewSet(UserViewSet):
@@ -47,57 +47,44 @@ class CustomUserViewSet(UserViewSet):
             user.set_password(serializer.validated_data["new_password"])
             user.save()
             return Response({"status": "password set"})
-        else:
-            return Response(
-                serializer.errors, status=status.HTTP_400_BAD_REQUEST
-            )
-
-
-class FollowView(APIView):
-    """
-    APIView for add and delete subscription for author
-    """
-    serializer_class = FollowSerializer
-    permission_classes = (IsAuthenticated,)
-
-    def post(self, request, user_id):
-        # user_id = self.kwargs.get()
-        if user_id == request.user.id:
-            return Response(
-                {'error': 'You can not subscribe for yourself'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        if Follow.objects.filter(
-            user=request.user,
-            following_id=user_id
-        ).exists():
-            return Response(
-                {'error': 'You already subscribed'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        Follow.objects.create(
-            user=request.user,
-            following_id=user_id
-        )
         return Response(
-            self.serializer_class(
-                get_object_or_404(User, id=user_id),
-                context={'request': request}).data,
-            status=status.HTTP_201_CREATED
+            serializer.errors, status=status.HTTP_400_BAD_REQUEST
         )
 
-    def delete(self, request, user_id):
-        subscription = Follow.objects.filter(
-            user=request.user,
-            following_id=user_id,
-        )
-        if subscription.exists():
-            subscription.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
-        return Response(
-            {'error': 'You not subscribed on this user'},
-            status=status.HTTP_400_BAD_REQUEST
-        )
+    @action(
+        methods=["delete", "post"],
+        detail=True,
+        permission_classes=[IsAuthenticated],
+    )
+    def subscribe(self, request, id):
+        user = request.user
+        following = get_object_or_404(User, pk=id)
+        follow = Follow.objects.filter(user=user, following=following)
+        data = {
+            "user": user.id,
+            "following": following.id,
+        }
+        serializer = FollowerSerializer(data=data, context=request)
+        if request.method == "POST":
+            if serializer.is_valid(raise_exception=True):
+                serializer.save()
+                return Response(
+                    serializer.data,
+                    status=status.HTTP_201_CREATED
+                )
+            else:
+                return Response(
+                    serializer.errors,
+                    status=status.HTTP_201_CREATED
+                )
+        if request.method == "DELETE":
+            if serializer.is_valid(raise_exception=False):
+                follow.delete()
+                return Response(status=status.HTTP_204_NO_CONTENT)
+            return Response(
+                serializer.errors,
+                status=status.HTTP_400_BAD_REQUEST)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class FollowListView(ListAPIView):

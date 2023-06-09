@@ -110,7 +110,6 @@ class RecipeListSerializer(serializers.ModelSerializer):
     is_in_shopping_cart = serializers.SerializerMethodField(read_only=True)
     image = Base64ImageField(required=False, allow_null=True)
 
-
     class Meta:
         model = Recipes
         fields = ('id', 'tags', 'author', 'ingredients',

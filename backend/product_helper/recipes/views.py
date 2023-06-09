@@ -14,7 +14,7 @@ from .filters import IngredientFilter, RecipeFilter
 from .models import (Favorite, Ingredient, Recipes, RecipesIngredient,
                      ShoppingCart, Tag)
 from .pagination import CustomPageNumberPagination
-from .permissions import IsAuthorOrReadOnly
+from .permissions import IsAuthentificatedAuthorOrReadOnly
 from .serializers import (FavoriteSerializer, IngredientSerializer,
                           RecipeCreateSerializer, RecipeListSerializer,
                           ShoppingCartSerializer, TagSerializer)
@@ -54,7 +54,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     Complex ViewSet for recipes.
     """
     queryset = Recipes.objects.all()
-    permission_classes = [IsAuthorOrReadOnly]
+    permission_classes = [IsAuthentificatedAuthorOrReadOnly]
     filter_backends = [DjangoFilterBackend]
     filterset_class = RecipeFilter
     pagination_class = CustomPageNumberPagination
